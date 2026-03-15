@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a1a12">
+<title>NatureRx — 自然気づきアプリ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=DM+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+/* =====================================================
+   DESIGN SYSTEM — organic / field-notebook aesthetic
+   ===================================================== */
+:root {
+  --moss:      #1a3d2b;
+  --forest:    #0f6e56;
+  --fern:      #2d7a4f;
+  --sage:      #5a8a6a;
+  --mist:      #c8ddd0;
+  --dew:       #e8f2ec;
+  --parchment: #f5f0e8;
+  --ink:       #1a1f1c;
+  --bark:      #4a3728;
+  --amber:     #c8821a;
+  --red-list:  #9b3030;
+  --purple:    #4a3a7a;
+
+  --font-serif: 'Shippori Mincho', serif;
+  --font-sans:  'Zen Kaku Gothic New', sans-serif;
+  --font-mono:  'DM Mono', monospace;
+
+  --radius:    12px;
+  --radius-lg: 20px;
+  --ease:      cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--ink);
+  color: var(--parchment);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* =====================================================
+   APP SHELL
+   ===================================================== */
+#app {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  background: #0d1a12;
+  overflow: hidden;
+}
+
+/* Background texture */
+#app::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  max-width: 430px;
+  margin: 0 auto;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(26,61,43,0.6) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 80%, rgba(15,110,86,0.15) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* =====================================================
+   SCREENS
+   ===================================================== */
+.screen {
+  display: none;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.3s var(--ease);
+}
+.screen.active { display: flex; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+.header {
+  padding: 52px 20px 16px;
+  border-bottom: 0.5px solid rgba(200,221,208,0.15);
+}
+
+.header-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--sage);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.header-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--dew);
+  line-height: 1.2;
+}
+
+.header-sub {
+  font-size: 12px;
+  color: var(--sage);
+  margin-top: 4px;
+}
+
+/* =====================================================
+   SCROLL CONTENT
+   ===================================================== */
+.scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 100px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-content::-webkit-scrollbar { display: none; }
+
+/* =====================================================
+   BOTTOM NAV
+   ===================================================== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  background: rgba(13,26,18,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 0.5px solid rgba(200,221,208,0.12);
+  display: flex;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 12px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  border: none;
+  background: none;
+  color: var(--sage);
+  font-family: var(--font-sans);
+  gap: 3px;
+}
+
+.nav-item.active { color: var(--forest); }
+.nav-item svg { width: 22px; height: 22px; }
+.nav-label { font-size: 9px; letter-spacing: 0.05em; }
+
+/* =====================================================
+   CARDS
+   ===================================================== */
+.card {
+  background: rgba(26,61,43,0.25);
+  border: 0.5px solid rgba(200,221,208,0.15);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s var(--ease);
+}
+
+.card:active { border-color: rgba(200,221,208,0.35); }
+
+.card-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--sage);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.card-value {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  color: var(--dew);
+  font-weight: 500;
+}
+
+.card-unit {
+  font-size: 12px;
+  color: var(--sage);
+  margin-left: 4px;
+}
+
+/* =====================================================
+   RING PROGRESS
+   ===================================================== */
+.ring-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.ring-svg { width: 72px; height: 72px; flex-shrink: 0; }
+
+.ring-info-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--dew);
+  margin-bottom: 2px;
+}
+.ring-info-sub { font-size: 11px; color: var(--sage); }
+
+/* =====================================================
+   STREAK
+   ===================================================== */
+.streak-dots {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.streak-dot {
+  width: 28px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+/* =====================================================
+   TAGS / PILLS
+   ===================================================== */
+.tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 400;
+  border-radius: 20px;
+  padding: 3px 9px;
+  border: 0.5px solid;
+}
+.tag-green  { color: #5DCAA5; border-color: rgba(93,202,165,0.35); background: rgba(93,202,165,0.08); }
+.tag-purple { color: #AFA9EC; border-color: rgba(175,169,236,0.35); background: rgba(175,169,236,0.08); }
+.tag-amber  { color: #EF9F27; border-color: rgba(239,159,39,0.35);  background: rgba(239,159,39,0.08); }
+.tag-red    { color: #F09595; border-color: rgba(240,149,149,0.35); background: rgba(240,149,149,0.08); }
+
+/* =====================================================
+   BUTTONS
+   ===================================================== */
+.btn-primary {
+  display: block;
+  width: 100%;
+  background: var(--forest);
+  color: var(--dew);
+  border: none;
+  border-radius: var(--radius);
+  padding: 14px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.btn-primary:active { background: var(--fern); transform: scale(0.98); }
+
+.btn-ghost {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: var(--sage);
+  border: 0.5px solid rgba(200,221,208,0.2);
+  border-radius: var(--radius);
+  padding: 13px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  text-align: center;
+  margin-top: 8px;
+}
+.btn-ghost:active { border-color: rgba(200,221,208,0.4); }
+
+/* =====================================================
+   SECTION TITLE
+   ===================================================== */
+.section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin: 20px 0 10px;
+}
+
+/* =====================================================
+   DIVIDER
+   ===================================================== */
+.divider {
+  height: 0.5px;
+  background: rgba(200,221,208,0.1);
+  margin: 12px 0;
+}
+
+/* =====================================================
+   SCREEN 1: HOME
+   ===================================================== */
+.today-ring-card {
+  background: rgba(15,110,86,0.12);
+  border: 0.5px solid rgba(29,158,117,0.3);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 10px;
+}
+
+.streak-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.quick-entry {
+  background: rgba(26,61,43,0.4);
+  border: 1px dashed rgba(200,221,208,0.2);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  margin-bottom: 10px;
+}
+.quick-entry:active { border-color: rgba(29,158,117,0.5); }
+.quick-entry-icon { font-size: 28px; margin-bottom: 6px; }
+.quick-entry-text { font-size: 13px; color: var(--mist); }
+.quick-entry-sub { font-size: 11px; color: var(--sage); margin-top: 2px; }
+
+.log-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 0.5px solid rgba(200,221,208,0.08);
+}
+.log-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--forest);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.log-dot.purple { background: #534AB7; }
+.log-dot.amber  { background: #BA7517; }
+.log-title  { font-size: 13px; color: var(--dew); margin-bottom: 2px; }
+.log-meta   { font-size: 11px; color: var(--sage); }
+.log-mood   { margin-left: auto; font-size: 18px; flex-shrink: 0; }
+
+/* =====================================================
+   SCREEN 2: LOG INPUT
+   ===================================================== */
+.prompt-card {
+  background: linear-gradient(135deg, rgba(15,110,86,0.2), rgba(74,58,122,0.15));
+  border: 0.5px solid rgba(93,202,165,0.25);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 14px;
+}
+
+.prompt-q {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--dew);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.prompt-hint {
+  font-size: 11px;
+  color: var(--sage);
+}
+
+.sense-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.sense-btn {
+  background: rgba(26,61,43,0.3);
+  border: 0.5px solid rgba(200,221,208,0.15);
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--sage);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  font-family: var(--font-sans);
+}
+.sense-btn.sel {
+  background: rgba(29,158,117,0.2);
+  border-color: rgba(29,158,117,0.5);
+  color: #5DCAA5;
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.type-btn {
+  background: rgba(26,61,43,0.3);
+  border: 0.5px solid rgba(200,221,208,0.15);
+  border-radius: 8px;
+  padding: 10px 8px;
+  font-size: 11px;
+  color: var(--sage);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  font-family: var(--font-sans);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.type-btn.sel {
+  background: rgba(29,158,117,0.15);
+  border-color: rgba(29,158,117,0.4);
+  color: #5DCAA5;
+}
+
+.mood-pair {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.mood-col { flex: 1; text-align: center; }
+.mood-label { font-size: 10px; color: var(--sage); margin-bottom: 6px; font-family: var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.mood-emojis { display: flex; gap: 6px; justify-content: center; }
+.mood-emoji { font-size: 22px; cursor: pointer; opacity: 0.4; transition: all 0.15s; border-radius: 50%; padding: 2px; }
+.mood-emoji.sel { opacity: 1; transform: scale(1.2); }
+.mood-arrow { font-size: 18px; color: var(--sage); padding-top: 16px; }
+
+.time-slider-wrap { margin-bottom: 14px; }
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.time-value {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  color: var(--dew);
+}
+.time-unit { font-size: 13px; color: var(--sage); }
+
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(200,221,208,0.15);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--forest);
+  cursor: pointer;
+  border: 2px solid var(--dew);
+}
+
+textarea {
+  width: 100%;
+  background: rgba(26,61,43,0.3);
+  border: 0.5px solid rgba(200,221,208,0.15);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  color: var(--dew);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  resize: none;
+  min-height: 80px;
+  margin-bottom: 6px;
+  outline: none;
+  transition: border-color 0.2s var(--ease);
+  line-height: 1.6;
+}
+textarea::placeholder { color: rgba(200,221,208,0.3); }
+textarea:focus { border-color: rgba(29,158,117,0.5); }
+
+.research-note {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(175,169,236,0.7);
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* =====================================================
+   SCREEN 3: JOURNAL
+   ===================================================== */
+.journal-entry {
+  border-left: 2px solid var(--forest);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: rgba(26,61,43,0.2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  border-top: 0.5px solid rgba(200,221,208,0.08);
+  border-right: 0.5px solid rgba(200,221,208,0.08);
+  border-bottom: 0.5px solid rgba(200,221,208,0.08);
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+.journal-entry:active { background: rgba(26,61,43,0.4); }
+.journal-entry.purple { border-left-color: #534AB7; }
+.journal-entry.amber  { border-left-color: #BA7517; }
+
+.je-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px; }
+.je-title  { font-size: 13px; color: var(--dew); font-weight: 500; }
+.je-date   { font-family: var(--font-mono); font-size: 9px; color: var(--sage); }
+.je-text   { font-size: 12px; color: var(--mist); line-height: 1.5; margin-bottom: 5px; }
+.je-tags   { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+.je-mood   { font-size: 14px; }
+
+.monthly-summary {
+  background: rgba(15,110,86,0.1);
+  border: 0.5px solid rgba(29,158,117,0.2);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.ms-stat { flex: 1; text-align: center; }
+.ms-num  { font-family: var(--font-serif); font-size: 22px; color: var(--dew); }
+.ms-label { font-size: 10px; color: var(--sage); margin-top: 2px; }
+
+/* =====================================================
+   SCREEN 4: MAP
+   ===================================================== */
+.map-container {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 10px;
+  position: relative;
+  border: 0.5px solid rgba(200,221,208,0.15);
+}
+
+.map-svg-bg { display: block; width: 100%; }
+
+.map-legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.bio-detail-card {
+  background: rgba(26,61,43,0.3);
+  border: 0.5px solid rgba(29,158,117,0.25);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.score-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.score-ring-wrap { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+
+.score-bars { flex: 1; }
+.score-bar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.score-bar-label { font-size: 10px; color: var(--sage); width: 28px; flex-shrink: 0; }
+.score-bar-bg { flex: 1; height: 4px; border-radius: 2px; background: rgba(200,221,208,0.1); overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 2px; transition: width 0.8s var(--ease); }
+.score-bar-val { font-size: 10px; color: var(--sage); width: 26px; text-align: right; flex-shrink: 0; }
+
+.species-list { margin-top: 8px; }
+.species-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 0.5px solid rgba(200,221,208,0.06);
+}
+.sp-icon  { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+.sp-info  { flex: 1; }
+.sp-name  { font-size: 12px; color: var(--dew); }
+.sp-sci   { font-family: var(--font-mono); font-size: 9px; color: var(--sage); font-style: italic; }
+.sp-tag   { flex-shrink: 0; }
+
+/* =====================================================
+   SCREEN 5: INSIGHTS
+   ===================================================== */
+.insight-card {
+  background: rgba(15,110,86,0.1);
+  border: 0.5px solid rgba(93,202,165,0.2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.insight-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: #5DCAA5;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.insight-text {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: var(--dew);
+  line-height: 1.5;
+  margin-bottom: 5px;
+}
+
+.insight-sub { font-size: 11px; color: var(--sage); }
+
+.sensitivity-track {
+  background: rgba(26,61,43,0.3);
+  border: 0.5px solid rgba(200,221,208,0.1);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.sense-radar-wrap { text-align: center; margin: 8px 0; }
+
+.snz-card {
+  background: rgba(74,58,122,0.15);
+  border: 0.5px solid rgba(175,169,236,0.2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.snz-title {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  color: #AFA9EC;
+  margin-bottom: 6px;
+}
+
+.snz-items { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.corr-display {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.corr-box {
+  flex: 1;
+  text-align: center;
+  background: rgba(26,61,43,0.3);
+  border-radius: 8px;
+  padding: 10px 6px;
+  border: 0.5px solid rgba(200,221,208,0.1);
+}
+.corr-num { font-family: var(--font-serif); font-size: 22px; }
+.corr-label { font-size: 9px; color: var(--sage); margin-top: 2px; }
+
+/* =====================================================
+   INTERACTIVE MAP SCREEN
+   ===================================================== */
+#screen-map {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+#leaflet-map {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #0d1a12;
+}
+#leaflet-map .leaflet-tile { filter: brightness(0.55) saturate(0.5) hue-rotate(80deg); }
+#map-toolbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 10;
+  padding: 48px 14px 10px;
+  background: linear-gradient(to bottom, rgba(10,26,18,0.92) 70%, transparent);
+  pointer-events: none;
+}
+#map-toolbar > * { pointer-events: auto; }
+#map-status-bar {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+}
+#map-status-text {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+  color: var(--sage); text-transform: uppercase;
+}
+#locate-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(29,158,117,0.2); border: 0.5px solid rgba(29,158,117,0.5);
+  color: #5DCAA5; border-radius: 20px; padding: 5px 12px;
+  font-size: 11px; font-family: var(--font-sans); cursor: pointer;
+}
+#locate-btn:active { background: rgba(29,158,117,0.35); }
+#radius-row { display: flex; align-items: center; gap: 8px; }
+#radius-pills { display: flex; gap: 4px; }
+.rpill {
+  background: rgba(13,26,18,0.75); border: 0.5px solid rgba(200,221,208,0.2);
+  color: var(--sage); border-radius: 14px; padding: 4px 10px;
+  font-size: 10px; font-family: var(--font-sans); cursor: pointer; transition: all 0.15s;
+}
+.rpill.active { background: rgba(29,158,117,0.25); border-color: rgba(29,158,117,0.6); color: #5DCAA5; }
+#species-count-badge {
+  margin-left: auto; font-family: var(--font-mono); font-size: 10px; color: var(--mist);
+  background: rgba(13,26,18,0.6); border: 0.5px solid rgba(200,221,208,0.15);
+  border-radius: 10px; padding: 3px 9px; display: none;
+}
+#species-count-badge.show { display: inline-block; }
+#map-legend-overlay {
+  position: absolute; bottom: 210px; right: 12px; z-index: 10;
+  background: rgba(10,26,18,0.82); backdrop-filter: blur(8px);
+  border: 0.5px solid rgba(200,221,208,0.12); border-radius: 10px;
+  padding: 8px 10px; display: flex; flex-direction: column; gap: 5px;
+}
+.ml-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--mist); }
+.ml-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.spot-panel-hidden {
+  position: absolute; bottom: 60px; left: 0; right: 0; z-index: 20;
+  background: rgba(10,20,14,0.97); backdrop-filter: blur(16px);
+  border-top: 0.5px solid rgba(200,221,208,0.15);
+  border-radius: 20px 20px 0 0; max-height: 0; overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.spot-panel-open { max-height: 52vh; overflow-y: auto; }
+#spot-panel-handle {
+  width: 36px; height: 4px; background: rgba(200,221,208,0.2);
+  border-radius: 2px; margin: 10px auto 0;
+}
+#spot-panel-content { padding: 12px 18px 20px; }
+.bio-marker {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3); font-size: 16px; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+.bio-marker-high   { background: rgba(29,158,117,0.9); }
+.bio-marker-medium { background: rgba(186,117,23,0.9); }
+.bio-marker-low    { background: rgba(95,94,90,0.85); }
+.leaflet-radius-circle path {
+  stroke: rgba(29,158,117,0.5); stroke-width: 1.5;
+  fill: rgba(29,158,117,0.06); stroke-dasharray: 6 4;
+}
+#map-loading {
+  position: absolute; inset: 0; z-index: 15;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(10,20,14,0.7); backdrop-filter: blur(4px);
+  gap: 10px; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+}
+#map-loading.show { opacity: 1; pointer-events: auto; }
+.spin {
+  width: 28px; height: 28px; border: 2px solid rgba(29,158,117,0.3);
+  border-top-color: #1D9E75; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#map-loading-text { font-size: 12px; color: var(--sage); font-family: var(--font-mono); letter-spacing: 0.08em; }
+
+/* =====================================================
+   TOAST
+   ===================================================== */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--forest);
+  color: var(--dew);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  opacity: 0;
+  transition: all 0.3s var(--ease);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 200;
+  max-width: 90%;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* =====================================================
+   MODAL (記録完了)
+   ===================================================== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,26,18,0.85);
+  backdrop-filter: blur(8px);
+  z-index: 150;
+  align-items: center;
+  justify-content: center;
+  max-width: 430px;
+  margin: 0 auto;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: #0f1e15;
+  border: 0.5px solid rgba(29,158,117,0.35);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  width: calc(100% - 48px);
+  text-align: center;
+  animation: modalIn 0.3s var(--ease);
+}
+@keyframes modalIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.modal-icon { font-size: 48px; margin-bottom: 10px; }
+.modal-title { font-family: var(--font-serif); font-size: 20px; color: var(--dew); margin-bottom: 6px; }
+.modal-sub { font-size: 12px; color: var(--sage); margin-bottom: 20px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ======== SCREEN: HOME ======== -->
+  <div class="screen active" id="screen-home">
+    <div class="header">
+      <div class="header-eyebrow">NatureRx β</div>
+      <div class="header-title">今日の<br>自然との対話</div>
+      <div class="header-sub">2026年3月15日 · 神戸市</div>
+    </div>
+
+    <div class="scroll-content">
+
+      <!-- Today ring -->
+      <div class="today-ring-card">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="28" fill="none" stroke="rgba(200,221,208,0.1)" stroke-width="6"/>
+            <circle cx="36" cy="36" r="28" fill="none" stroke="#1D9E75" stroke-width="6"
+              stroke-dasharray="176" stroke-dashoffset="132"
+              stroke-linecap="round" transform="rotate(-90 36 36)"/>
+            <text x="36" y="32" text-anchor="middle" font-size="13" font-weight="500" fill="#e8f2ec" font-family="'Shippori Mincho', serif">23</text>
+            <text x="36" y="44" text-anchor="middle" font-size="8" fill="#5a8a6a" font-family="'Zen Kaku Gothic New', sans-serif">分</text>
+          </svg>
+          <div>
+            <div class="ring-info-title">今日の自然接触</div>
+            <div class="ring-info-sub">目標 60分 まであと 37分</div>
+            <div style="margin-top:8px; display:flex; gap:5px; flex-wrap:wrap;">
+              <span class="tag tag-green">🌳 公園 15分</span>
+              <span class="tag tag-amber">🐦 野鳥 8分</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider" style="margin: 10px 0;"></div>
+        <div class="streak-item">
+          <span style="font-size:12px; color:var(--mist)">連続記録</span>
+          <span style="font-family:var(--font-mono); font-size:11px; color:#5DCAA5">🔥 7日連続</span>
+        </div>
+        <div class="streak-dots" style="margin-top:8px;">
+          <div class="streak-dot" style="background:rgba(29,158,117,0.3)"></div>
+          <div class="streak-dot" style="background:rgba(29,158,117,0.45)"></div>
+          <div class="streak-dot" style="background:rgba(29,158,117,0.6)"></div>
+          <div class="streak-dot" style="background:var(--forest)"></div>
+          <div class="streak-dot" style="background:var(--forest)"></div>
+          <div class="streak-dot" style="background:var(--forest)"></div>
+          <div class="streak-dot" style="background:var(--forest)"></div>
+        </div>
+      </div>
+
+      <!-- Quick entry -->
+      <div class="quick-entry" onclick="goTo('log')">
+        <div class="quick-entry-icon">＋</div>
+        <div class="quick-entry-text">今日の気づきを記録する</div>
+        <div class="quick-entry-sub">30秒でOK · 自然の「いいもの」に気づきましたか？</div>
+      </div>
+
+      <!-- Recent log -->
+      <div class="section-title">最近の気づき</div>
+
+      <div class="log-item">
+        <div class="log-dot"></div>
+        <div style="flex:1">
+          <div class="log-title">桜のつぼみを見つけた</div>
+          <div class="log-meta">相楽園 · 今日 · 👁 視覚</div>
+        </div>
+        <div class="log-mood">😊</div>
+      </div>
+
+      <div class="log-item">
+        <div class="log-dot purple"></div>
+        <div style="flex:1">
+          <div class="log-title">ヒヨドリの声が聴こえた</div>
+          <div class="log-meta">通学路 · 昨日 · 👂 聴覚</div>
+        </div>
+        <div class="log-mood">😄</div>
+      </div>
+
+      <div class="log-item">
+        <div class="log-dot amber"></div>
+        <div style="flex:1">
+          <div class="log-title">雨上がりの土のにおい</div>
+          <div class="log-meta">大学周辺 · 3日前 · 👃 嗅覚</div>
+        </div>
+        <div class="log-mood">😊</div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <button class="btn-ghost" onclick="goTo('journal')">すべてのログを見る →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== SCREEN: LOG INPUT ======== -->
+  <div class="screen" id="screen-log">
+    <div class="header">
+      <div class="header-eyebrow">気づきを記録</div>
+      <div class="header-title">今日、自然の<br>「いいもの」に気づいた？</div>
+    </div>
+
+    <div class="scroll-content">
+
+      <div class="prompt-card">
+        <div class="prompt-q">🌿 鳥の声、木漏れ日、風のにおい、<br>葉の動き……なんでも。</div>
+        <div class="prompt-hint">Richardson et al. (2019) の「3 good things in nature」介入を応用</div>
+      </div>
+
+      <!-- 感覚モダリティ -->
+      <div class="section-title">どの感覚で気づいた？</div>
+      <div class="sense-grid">
+        <div class="sense-btn sel" data-sense="👁 視覚" onclick="toggleSense(this)">👁<br>視覚</div>
+        <div class="sense-btn" data-sense="👂 聴覚" onclick="toggleSense(this)">👂<br>聴覚</div>
+        <div class="sense-btn" data-sense="👃 嗅覚" onclick="toggleSense(this)">👃<br>嗅覚</div>
+        <div class="sense-btn" data-sense="🤚 触覚" onclick="toggleSense(this)">🤚<br>触覚</div>
+        <div class="sense-btn" data-sense="🌡 体感" onclick="toggleSense(this)">🌡<br>体感</div>
+        <div class="sense-btn" data-sense="💭 直感" onclick="toggleSense(this)">💭<br>直感</div>
+      </div>
+
+      <!-- 自然の種類 -->
+      <div class="section-title">どんな自然？</div>
+      <div class="type-grid">
+        <div class="type-btn sel" onclick="toggleType(this)">🌳 公園・緑地</div>
+        <div class="type-btn" onclick="toggleType(this)">🌊 川・海・池</div>
+        <div class="type-btn" onclick="toggleType(this)">🐦 野鳥・生き物</div>
+        <div class="type-btn" onclick="toggleType(this)">🌿 植物・花</div>
+        <div class="type-btn" onclick="toggleType(this)">☀️ 光・空・風</div>
+        <div class="type-btn" onclick="toggleType(this)">🏠 ベランダ・庭</div>
+      </div>
+
+      <!-- 接触時間 -->
+      <div class="section-title">接触時間</div>
+      <div class="time-slider-wrap">
+        <div class="time-display">
+          <div>
+            <span class="time-value" id="time-val">30</span>
+            <span class="time-unit">分</span>
+          </div>
+          <span style="font-size:11px; color:var(--sage)">0 – 120分</span>
+        </div>
+        <input type="range" min="0" max="120" value="30" step="5"
+          oninput="document.getElementById('time-val').textContent=this.value">
+      </div>
+
+      <!-- 気分変化 -->
+      <div class="section-title">前後の気分変化</div>
+      <div class="mood-pair">
+        <div class="mood-col">
+          <div class="mood-label">体験前</div>
+          <div class="mood-emojis">
+            <span class="mood-emoji" onclick="selectMood('before',this)">😔</span>
+            <span class="mood-emoji sel" onclick="selectMood('before',this)">😐</span>
+            <span class="mood-emoji" onclick="selectMood('before',this)">😊</span>
+            <span class="mood-emoji" onclick="selectMood('before',this)">😄</span>
+          </div>
+        </div>
+        <div class="mood-arrow">→</div>
+        <div class="mood-col">
+          <div class="mood-label">体験後</div>
+          <div class="mood-emojis">
+            <span class="mood-emoji" onclick="selectMood('after',this)">😔</span>
+            <span class="mood-emoji" onclick="selectMood('after',this)">😐</span>
+            <span class="mood-emoji sel" onclick="selectMood('after',this)">😊</span>
+            <span class="mood-emoji" onclick="selectMood('after',this)">😄</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自由記述 -->
+      <div class="section-title">気づいたこと（自由記述）</div>
+      <textarea id="notice-text" placeholder="公園の桜が少し膨らんでいた。春が来るのかと思ったら、急に気持ちが軽くなった。"></textarea>
+
+      <div class="research-note">
+        🔬 データは匿名で研究に使用されます（Richardson et al., 2019 準拠）
+      </div>
+
+      <button class="btn-primary" onclick="saveLog()">気づきを記録する</button>
+      <button class="btn-ghost" onclick="goTo('home')">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- ======== SCREEN: JOURNAL ======== -->
+  <div class="screen" id="screen-journal">
+    <div class="header">
+      <div class="header-eyebrow">自然ログ</div>
+      <div class="header-title">あなたの<br>自然日記</div>
+    </div>
+
+    <div class="scroll-content">
+
+      <div class="monthly-summary">
+        <div class="ms-stat">
+          <div class="ms-num">18</div>
+          <div class="ms-label">今月の気づき</div>
+        </div>
+        <div class="ms-stat">
+          <div class="ms-num" style="color:#5DCAA5">8.2h</div>
+          <div class="ms-label">自然接触時間</div>
+        </div>
+        <div class="ms-stat">
+          <div class="ms-num" style="color:#AFA9EC">+12%</div>
+          <div class="ms-label">先月比</div>
+        </div>
+      </div>
+
+      <div class="section-title">3月のログ</div>
+
+      <div class="journal-entry" onclick="showToast('詳細表示機能は実装予定です')">
+        <div class="je-header">
+          <span class="je-title">🌸 桜のつぼみを見つけた</span>
+          <span class="je-date">03/15</span>
+        </div>
+        <div class="je-text">公園の桜が少し膨らんでいた。春が来るのかと思ったら、急に気持ちが軽くなった。</div>
+        <div class="je-tags">
+          <span class="tag tag-green">👁 視覚</span>
+          <span class="tag tag-green">🌳 公園</span>
+          <span class="je-mood">😔→😊</span>
+        </div>
+      </div>
+
+      <div class="journal-entry purple" onclick="showToast('詳細表示機能は実装予定です')">
+        <div class="je-header">
+          <span class="je-title">🐦 ヒヨドリの声</span>
+          <span class="je-date">03/14</span>
+        </div>
+        <div class="je-text">電線にとまっていた。あんな街中でも鳥がいるんだな、と驚いた。</div>
+        <div class="je-tags">
+          <span class="tag tag-amber">👂 聴覚</span>
+          <span class="tag tag-purple">🐦 野鳥</span>
+          <span class="je-mood">😐→😄</span>
+        </div>
+      </div>
+
+      <div class="journal-entry amber" onclick="showToast('詳細表示機能は実装予定です')">
+        <div class="je-header">
+          <span class="je-title">🌧 ペトリコールを感じた</span>
+          <span class="je-date">03/11</span>
+        </div>
+        <div class="je-text">雨上がりの土のにおい。通学中にふいに感じた。ペトリコールというらしい。</div>
+        <div class="je-tags">
+          <span class="tag tag-amber">👃 嗅覚</span>
+          <span class="tag tag-amber">💭 直感</span>
+          <span class="je-mood">😐→😊</span>
+        </div>
+      </div>
+
+      <div class="journal-entry" onclick="showToast('詳細表示機能は実装予定です')">
+        <div class="je-header">
+          <span class="je-title">🌿 川沿いの枯れ草</span>
+          <span class="je-date">03/09</span>
+        </div>
+        <div class="je-text">45分ほど川沿いを歩いた。枯れた葦が風でさわさわ鳴っていた。何か懐かしい感じ。</div>
+        <div class="je-tags">
+          <span class="tag tag-green">🌡 体感</span>
+          <span class="tag tag-green">🌊 水辺</span>
+          <span class="je-mood">😔→😄</span>
+        </div>
+      </div>
+
+      <div class="journal-entry purple" onclick="showToast('詳細表示機能は実装予定です')">
+        <div class="je-header">
+          <span class="je-title">☀️ 木漏れ日のパターン</span>
+          <span class="je-date">03/07</span>
+        </div>
+        <div class="je-text">大学の木の影が揺れていた。光の模様を5分くらいぼーっと見ていた。</div>
+        <div class="je-tags">
+          <span class="tag tag-green">👁 視覚</span>
+          <span class="tag tag-green">☀️ 光・空</span>
+          <span class="je-mood">😊→😄</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== SCREEN: MAP ======== -->
+  <div class="screen" id="screen-map">
+
+    <!-- Map toolbar (floats above map) -->
+    <div id="map-toolbar">
+      <div id="map-status-bar">
+        <span id="map-status-text">現在地を取得中...</span>
+        <button id="locate-btn" onclick="locateUser()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
+          現在地
+        </button>
+      </div>
+      <div id="radius-row">
+        <span style="font-size:10px;color:var(--sage)">検索半径</span>
+        <div id="radius-pills">
+          <button class="rpill active" onclick="setRadius(500,this)">500m</button>
+          <button class="rpill" onclick="setRadius(1000,this)">1km</button>
+          <button class="rpill" onclick="setRadius(2000,this)">2km</button>
+        </div>
+        <span id="species-count-badge"></span>
+      </div>
+    </div>
+
+    <!-- Full-screen Leaflet map -->
+    <div id="leaflet-map"></div>
+
+    <!-- Legend overlay -->
+    <div id="map-legend-overlay">
+      <div class="ml-item"><span class="ml-dot" style="background:#1D9E75"></span>高 20種+</div>
+      <div class="ml-item"><span class="ml-dot" style="background:#BA7517"></span>中 10–19</div>
+      <div class="ml-item"><span class="ml-dot" style="background:#5F5E5A"></span>低 –9</div>
+      <div class="ml-item"><span class="ml-dot" style="background:#185FA5"></span>現在地</div>
+    </div>
+
+    <!-- Slide-up detail panel -->
+    <div id="spot-panel" class="spot-panel-hidden">
+      <div id="spot-panel-handle"></div>
+      <div id="spot-panel-content">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======== SCREEN: INSIGHTS ======== -->
+  <div class="screen" id="screen-insights">
+    <div class="header">
+      <div class="header-eyebrow">インサイト</div>
+      <div class="header-title">データが語る<br>あなたの傾向</div>
+      <div class="header-sub">4週間 · 18件の気づきから</div>
+    </div>
+
+    <div class="scroll-content">
+
+      <!-- Key finding -->
+      <div class="insight-card">
+        <div class="insight-eyebrow">✨ 今月の発見</div>
+        <div class="insight-text">水辺にいると気分が平均 +1.8 ポイント上昇する</div>
+        <div class="insight-sub">公園（+0.9）より川沿い・池が効果的 — あなたにとっての「最適自然」</div>
+      </div>
+
+      <!-- Noticing vs biodiversity -->
+      <div class="insight-card" style="background:rgba(74,58,122,0.12); border-color:rgba(175,169,236,0.2);">
+        <div class="insight-eyebrow" style="color:#AFA9EC">🔬 IWUNの知見との照合</div>
+        <div class="insight-text">低多様性エリアでも気づき後の気分上昇は同等</div>
+        <div class="insight-sub">駐車場脇の雑草 → 気分 +1.2 ／ 相楽園（高多様性）→ 気分 +1.4<br>「量より気づき」仮説をあなたのデータが支持</div>
+      </div>
+
+      <!-- Biodiversity vs noticing correlation -->
+      <div class="card">
+        <div class="card-label">生物多様性スコア × 気づき数（相関）</div>
+        <div class="corr-display">
+          <div class="corr-box">
+            <div class="corr-num" style="color:#1D9E75">r = 0.31</div>
+            <div class="corr-label">神戸（あなた）</div>
+          </div>
+          <div class="corr-box">
+            <div class="corr-num" style="color:#534AB7">r = 0.28</div>
+            <div class="corr-label">Sheffield（IWUN）</div>
+          </div>
+        </div>
+        <div style="font-size:10px; color:var(--sage); margin-top:8px; line-height:1.6;">
+          弱い正相関 — 多様性が高い場所ほど気づきは増えるが、決定的ではない。感受性の個人差が大きい。
+        </div>
+      </div>
+
+      <!-- Sense modality breakdown -->
+      <div class="sensitivity-track">
+        <div class="card-label">感覚モダリティの分布</div>
+        <div style="margin-top:4px">
+          <div class="score-bar-row" style="margin-bottom:6px">
+            <span class="score-bar-label">👁 視覚</span>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:67%;background:#1D9E75"></div></div>
+            <span class="score-bar-val">67%</span>
+          </div>
+          <div class="score-bar-row" style="margin-bottom:6px">
+            <span class="score-bar-label">👂 聴覚</span>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:22%;background:#534AB7"></div></div>
+            <span class="score-bar-val">22%</span>
+          </div>
+          <div class="score-bar-row" style="margin-bottom:6px">
+            <span class="score-bar-label">👃 嗅覚</span>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:11%;background:#BA7517"></div></div>
+            <span class="score-bar-val">11%</span>
+          </div>
+        </div>
+        <div style="font-size:10px; color:var(--sage); margin-top:6px;">
+          💡 聴覚・嗅覚を意識すると、気づきの幅が広がる可能性があります
+        </div>
+      </div>
+
+      <!-- SNZ reversal -->
+      <div class="snz-card">
+        <div class="card-label" style="color:#AFA9EC">経験の絶滅（SNZ）の逆転</div>
+        <div class="snz-title">1ヶ月前には気づかなかったもの</div>
+        <div class="snz-items">
+          <span class="tag tag-green">野鳥の鳴き声</span>
+          <span class="tag tag-green">街路樹の芽吹き</span>
+          <span class="tag tag-purple">土のにおい</span>
+          <span class="tag tag-amber">夕暮れの空の色</span>
+          <span class="tag tag-green">葉の揺れるリズム</span>
+        </div>
+        <div style="font-size:10px; color:rgba(175,169,236,0.65); margin-top:10px; line-height:1.6;">
+          記録を続けることで、以前は素通りしていた自然への感受性が育ちます。<br>
+          これがShifting Baseline Syndromeの逆転です。
+        </div>
+      </div>
+
+      <!-- Sensitivity score trend -->
+      <div class="card">
+        <div class="card-label">自然感受性スコアの変化</div>
+        <svg width="100%" viewBox="0 0 300 80" style="display:block;margin:8px 0">
+          <polyline points="10,68 50,58 90,52 130,42 170,30 210,22 260,14 290,10"
+            fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="290" cy="10" r="4" fill="#1D9E75"/>
+          <text x="296" y="14" font-size="10" fill="#5DCAA5" font-family="'Shippori Mincho',serif">62</text>
+          <text x="6"   y="78" font-size="8" fill="#5a8a6a" font-family="sans-serif">4週前</text>
+          <text x="246" y="78" font-size="8" fill="#5a8a6a" font-family="sans-serif">現在</text>
+          <!-- baseline -->
+          <line x1="0" y1="72" x2="300" y2="72" stroke="rgba(200,221,208,0.1)" stroke-width="0.5"/>
+        </svg>
+        <div style="font-size:11px; color:var(--sage);">31 → 62 ポイント ↑ この4週間で</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======== BOTTOM NAV ======== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-home" onclick="goTo('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/>
+      </svg>
+      <span class="nav-label">ホーム</span>
+    </button>
+    <button class="nav-item" id="nav-log" onclick="goTo('log')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/>
+      </svg>
+      <span class="nav-label">記録</span>
+    </button>
+    <button class="nav-item" id="nav-journal" onclick="goTo('journal')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+      </svg>
+      <span class="nav-label">ジャーナル</span>
+    </button>
+    <button class="nav-item" id="nav-map" onclick="goTo('map')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+        <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
+      </svg>
+      <span class="nav-label">マップ</span>
+    </button>
+    <button class="nav-item" id="nav-insights" onclick="goTo('insights')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span class="nav-label">インサイト</span>
+    </button>
+  </nav>
+
+  <!-- Map loading overlay (inside #app, sibling of screens) -->
+  <div id="map-loading">
+    <div class="spin"></div>
+    <div id="map-loading-text">iNaturalistに接続中...</div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Save modal -->
+  <div class="modal-overlay" id="save-modal">
+    <div class="modal-box">
+      <div class="modal-icon">🌿</div>
+      <div class="modal-title">気づきを記録しました</div>
+      <div class="modal-sub">自然感受性スコア +2 ／ 連続記録 8日目</div>
+      <button class="btn-primary" onclick="closeModal()">ホームに戻る</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* =====================================================
+   MAP MODULE
+   ===================================================== */
+let map = null;
+let userMarker = null;
+let radiusCircle = null;
+let spotMarkers = [];
+let currentRadius = 500;
+let userLatLng = null;
+let mapInitialized = false;
+
+// ---- mock data: iNaturalist-style spots around a given center ----
+const MOCK_SPOTS = [
+  {
+    id: 1, name: '相楽園', icon: '🌿', tier: 'high',
+    offsetLat: 0.006, offsetLng: -0.003,
+    species: 37, nativeRate: 82, rareCount: 3,
+    score: 75, shannon: 3.2,
+    taxa: [
+      { icon:'🐦', name:'ヒヨドリ',        sci:'Hypsipetes amaurotis',   status:'在来種', statusClass:'tag-green' },
+      { icon:'🦋', name:'アサギマダラ',      sci:'Parantica sita',         status:'準絶危', statusClass:'tag-red'   },
+      { icon:'🌸', name:'ヤマザクラ',        sci:'Prunus jamasakura',      status:'在来種', statusClass:'tag-green' },
+      { icon:'🐸', name:'ニホンアマガエル',  sci:'Hyla japonica',          status:'在来種', statusClass:'tag-green' },
+      { icon:'🌿', name:'セイタカアワダチソウ',sci:'Solidago altissima',   status:'外来種', statusClass:'tag-amber' },
+    ]
+  },
+  {
+    id: 2, name: '北野公園', icon: '🌳', tier: 'medium',
+    offsetLat: 0.009, offsetLng: 0.005,
+    species: 14, nativeRate: 71, rareCount: 1,
+    score: 48, shannon: 2.4,
+    taxa: [
+      { icon:'🐦', name:'スズメ',      sci:'Passer montanus',       status:'在来種', statusClass:'tag-green' },
+      { icon:'🌸', name:'ソメイヨシノ', sci:'Prunus × yedoensis',   status:'在来種', statusClass:'tag-green' },
+      { icon:'🐛', name:'ナナホシテントウ',sci:'Coccinella septempunctata', status:'在来種', statusClass:'tag-green' },
+      { icon:'🌿', name:'オオバコ',    sci:'Plantago asiatica',     status:'在来種', statusClass:'tag-green' },
+    ]
+  },
+  {
+    id: 3, name: '加納公園',  icon: '🌳', tier: 'medium',
+    offsetLat: -0.004, offsetLng: 0.007,
+    species: 11, nativeRate: 64, rareCount: 0,
+    score: 40, shannon: 2.1,
+    taxa: [
+      { icon:'🐦', name:'ムクドリ',  sci:'Sturnus cineraceus',   status:'在来種', statusClass:'tag-green' },
+      { icon:'🌿', name:'クズ',      sci:'Pueraria montana',     status:'在来種', statusClass:'tag-green' },
+      { icon:'🌿', name:'セイヨウタンポポ',sci:'Taraxacum officinale', status:'外来種', statusClass:'tag-amber' },
+    ]
+  },
+  {
+    id: 4, name: '街区緑地A', icon: '🌱', tier: 'low',
+    offsetLat: -0.002, offsetLng: -0.008,
+    species: 5, nativeRate: 40, rareCount: 0,
+    score: 18, shannon: 1.3,
+    taxa: [
+      { icon:'🌿', name:'セイタカアワダチソウ',sci:'Solidago altissima',  status:'外来種', statusClass:'tag-amber' },
+      { icon:'🌿', name:'カタバミ',          sci:'Oxalis corniculata',   status:'在来種', statusClass:'tag-green' },
+    ]
+  },
+  {
+    id: 5, name: '王子公園',  icon: '🌿', tier: 'high',
+    offsetLat: 0.003, offsetLng: 0.012,
+    species: 28, nativeRate: 78, rareCount: 2,
+    score: 62, shannon: 2.9,
+    taxa: [
+      { icon:'🐦', name:'カワセミ',    sci:'Alcedo atthis',        status:'在来種', statusClass:'tag-green' },
+      { icon:'🦎', name:'ニホントカゲ', sci:'Plestiodon japonicus', status:'在来種', statusClass:'tag-green' },
+      { icon:'🌸', name:'カタクリ',    sci:'Erythronium japonicum',status:'準絶危', statusClass:'tag-red'   },
+      { icon:'🦋', name:'モンシロチョウ',sci:'Pieris rapae',        status:'在来種', statusClass:'tag-green' },
+    ]
+  },
+];
+
+function scoreColor(tier) {
+  if (tier === 'high')   return '#1D9E75';
+  if (tier === 'medium') return '#BA7517';
+  return '#5F5E5A';
+}
+
+function scoreLabel(score) {
+  if (score >= 60) return '高多様性';
+  if (score >= 35) return '中多様性';
+  return '低多様性';
+}
+
+function initMap(lat, lng) {
+  if (mapInitialized) return;
+  mapInitialized = true;
+
+  map = L.map('leaflet-map', {
+    center: [lat, lng],
+    zoom: 15,
+    zoomControl: false,
+    attributionControl: false,
+  });
+
+  // OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  // Small attribution bottom-left
+  L.control.attribution({ position: 'bottomleft', prefix: false })
+    .addAttribution('<span style="font-size:8px;opacity:0.4">© OpenStreetMap</span>')
+    .addTo(map);
+
+  placeUserMarker(lat, lng);
+  placeRadiusCircle(lat, lng);
+  placeSpotMarkers(lat, lng);
+}
+
+function placeUserMarker(lat, lng) {
+  if (userMarker) userMarker.remove();
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="
+      width:16px;height:16px;border-radius:50%;
+      background:#185FA5;border:2px solid #fff;
+      box-shadow:0 0 0 6px rgba(24,95,165,0.2);">
+    </div>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+  userMarker = L.marker([lat, lng], { icon, zIndexOffset: 1000 }).addTo(map);
+}
+
+function placeRadiusCircle(lat, lng) {
+  if (radiusCircle) radiusCircle.remove();
+  radiusCircle = L.circle([lat, lng], {
+    radius: currentRadius,
+    className: 'leaflet-radius-circle',
+    interactive: false,
+  }).addTo(map);
+}
+
+function placeSpotMarkers(centerLat, centerLng) {
+  spotMarkers.forEach(m => m.remove());
+  spotMarkers = [];
+
+  MOCK_SPOTS.forEach(spot => {
+    const lat = centerLat + spot.offsetLat;
+    const lng = centerLng + spot.offsetLng;
+
+    // Distance check
+    const dist = map.distance([centerLat, centerLng], [lat, lng]);
+    if (dist > currentRadius * 1.8) return;
+
+    const color = scoreColor(spot.tier);
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="bio-marker bio-marker-${spot.tier}" style="background:${color}e6;">
+               <span>${spot.icon}</span>
+             </div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+    });
+
+    const marker = L.marker([lat, lng], { icon }).addTo(map);
+    marker.on('click', () => openSpotPanel(spot));
+    spotMarkers.push(marker);
+  });
+
+  // Update species count badge
+  const total = spotMarkers.length;
+  const badge = document.getElementById('species-count-badge');
+  if (total > 0) {
+    badge.textContent = `${total}スポット検出`;
+    badge.classList.add('show');
+  }
+}
+
+function openSpotPanel(spot) {
+  const panel = document.getElementById('spot-panel');
+  const content = document.getElementById('spot-panel-content');
+
+  const circumference = 2 * Math.PI * 26;
+  const offset = circumference * (1 - spot.score / 100);
+
+  const taxaHTML = spot.taxa.map(t => `
+    <div class="species-row">
+      <span class="sp-icon">${t.icon}</span>
+      <div class="sp-info">
+        <div class="sp-name">${t.name}</div>
+        <div class="sp-sci">${t.sci}</div>
+      </div>
+      <span class="tag ${t.statusClass} sp-tag" style="font-size:9px;padding:2px 7px;">${t.status}</span>
+    </div>`).join('');
+
+  content.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+      <div>
+        <div style="font-family:var(--font-serif);font-size:18px;color:var(--dew);">${spot.name}</div>
+        <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;">
+          <span class="tag tag-green">${scoreLabel(spot.score)}</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--sage);padding-top:3px;">Shannon H = ${spot.shannon}</span>
+        </div>
+      </div>
+      <button onclick="closeSpotPanel()" style="background:none;border:none;color:var(--sage);font-size:18px;cursor:pointer;padding:0 0 4px 10px;">✕</button>
+    </div>
+
+    <div class="score-row" style="margin-bottom:10px;">
+      <svg viewBox="0 0 64 64" width="60" height="60" style="flex-shrink:0;">
+        <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(200,221,208,0.1)" stroke-width="5"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="${scoreColor(spot.tier)}" stroke-width="5"
+          stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+          stroke-linecap="round" transform="rotate(-90 32 32)"/>
+        <text x="32" y="29" text-anchor="middle" font-size="13" font-weight="500" fill="#e8f2ec" font-family="'Shippori Mincho',serif">${spot.score}</text>
+        <text x="32" y="40" text-anchor="middle" font-size="7" fill="#5a8a6a" font-family="sans-serif">/100</text>
+      </svg>
+      <div class="score-bars" style="flex:1;">
+        <div class="score-bar-row">
+          <span class="score-bar-label">種数</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${Math.round(spot.species/50*100)}%;background:#1D9E75;"></div></div>
+          <span class="score-bar-val">${spot.species}種</span>
+        </div>
+        <div class="score-bar-row">
+          <span class="score-bar-label">在来率</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${spot.nativeRate}%;background:#534AB7;"></div></div>
+          <span class="score-bar-val">${spot.nativeRate}%</span>
+        </div>
+        <div class="score-bar-row">
+          <span class="score-bar-label">希少種</span>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${Math.min(spot.rareCount*20,100)}%;background:#BA7517;"></div></div>
+          <span class="score-bar-val">${spot.rareCount}種</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="card-label" style="margin-bottom:6px;">記録種（iNaturalist / GBIF）</div>
+    <div class="species-list">${taxaHTML}</div>
+
+    <button class="btn-primary" style="margin-top:14px;"
+      onclick="closeSpotPanel(); goTo('log'); showToast('${spot.name}での気づきを記録しましょう')">
+      ここで気づきを記録する ＋
+    </button>
+  `;
+
+  panel.classList.add('spot-panel-open');
+}
+
+function closeSpotPanel() {
+  document.getElementById('spot-panel').classList.remove('spot-panel-open');
+}
+
+function setRadius(r, btn) {
+  currentRadius = r;
+  document.querySelectorAll('.rpill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (userLatLng) {
+    placeRadiusCircle(userLatLng.lat, userLatLng.lng);
+    // Re-filter markers
+    spotMarkers.forEach(m => m.remove());
+    spotMarkers = [];
+    placeSpotMarkers(userLatLng.lat, userLatLng.lng);
+    map.fitBounds(radiusCircle.getBounds(), { padding: [40, 40] });
+  }
+}
+
+function locateUser() {
+  const loading = document.getElementById('map-loading');
+  const statusText = document.getElementById('map-status-text');
+
+  loading.classList.add('show');
+  document.getElementById('map-loading-text').textContent = '現在地を取得中...';
+
+  if (!navigator.geolocation) {
+    fallbackLocation();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      userLatLng = { lat, lng };
+      statusText.textContent = `現在地取得済み · 精度 ${Math.round(pos.coords.accuracy)}m`;
+
+      if (!mapInitialized) {
+        initMap(lat, lng);
+      } else {
+        map.setView([lat, lng], 15);
+        placeUserMarker(lat, lng);
+        placeRadiusCircle(lat, lng);
+        placeSpotMarkers(lat, lng);
+      }
+      fetchNearbySpeciesCount(lat, lng);
+      loading.classList.remove('show');
+    },
+    err => {
+      loading.classList.remove('show');
+      fallbackLocation();
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function fallbackLocation() {
+  // Default: 神戸市中央区
+  const lat = 34.6935, lng = 135.1944;
+  userLatLng = { lat, lng };
+  document.getElementById('map-status-text').textContent = 'デモ：神戸市中央区';
+  document.getElementById('map-loading').classList.remove('show');
+  if (!mapInitialized) {
+    initMap(lat, lng);
+  } else {
+    map.setView([lat, lng], 15);
+    placeUserMarker(lat, lng);
+    placeRadiusCircle(lat, lng);
+    placeSpotMarkers(lat, lng);
+  }
+  fetchNearbySpeciesCount(lat, lng);
+}
+
+/* iNaturalist API — fetch real nearby observation count
+   (CORS-friendly endpoint, no auth required)             */
+async function fetchNearbySpeciesCount(lat, lng) {
+  const radiusKm = (currentRadius / 1000).toFixed(1);
+  const url = `https://api.inaturalist.org/v1/observations?` +
+    `lat=${lat}&lng=${lng}&radius=${radiusKm}` +
+    `&per_page=1&quality_grade=research`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const count = data.total_results ?? 0;
+    const badge = document.getElementById('species-count-badge');
+    badge.textContent = `iNaturalist: 周辺${count}件の観察記録`;
+    badge.classList.add('show');
+  } catch {
+    // API unreachable in offline/demo — mock count is already shown
+  }
+}
+
+/* =====================================================
+   MAP SCREEN LIFECYCLE — init when tab opens
+   ===================================================== */
+function onMapTabOpen() {
+  setTimeout(() => {
+    // Trigger Leaflet resize in case container was hidden
+    if (map) { map.invalidateSize(); return; }
+    fallbackLocation();
+  }, 100);
+}
+</script>
+<script>
+/* =====================================================
+   NAVIGATION
+   ===================================================== */
+function goTo(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  const navEl = document.getElementById('nav-' + screen);
+  if (navEl) navEl.classList.add('active');
+  window.scrollTo(0, 0);
+  if (screen === 'map') onMapTabOpen();
+}
+
+/* =====================================================
+   SENSE / TYPE TOGGLES
+   ===================================================== */
+function toggleSense(el) {
+  el.classList.toggle('sel');
+}
+
+function toggleType(el) {
+  el.classList.toggle('sel');
+}
+
+/* =====================================================
+   MOOD SELECTION
+   ===================================================== */
+function selectMood(group, el) {
+  el.closest('.mood-emojis').querySelectorAll('.mood-emoji').forEach(e => e.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+/* =====================================================
+   SAVE LOG
+   ===================================================== */
+function saveLog() {
+  const text = document.getElementById('notice-text').value;
+  if (!text.trim()) {
+    showToast('気づいたことを入力してください');
+    return;
+  }
+  document.getElementById('save-modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('save-modal').classList.remove('show');
+  document.getElementById('notice-text').value = '';
+  goTo('home');
+}
+
+/* =====================================================
+   TOAST
+   ===================================================== */
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* =====================================================
+   iNaturalist API 実装ガイド（コメント）
+   =====================================================
+   
+   実際のAPI接続時は以下を使用：
+   
+   // 周辺の生物観察記録を取得
+   async function fetchNearbySpecies(lat, lng, radiusKm = 0.5) {
+     const url = `https://api.inaturalist.org/v1/observations?` +
+       `lat=${lat}&lng=${lng}&radius=${radiusKm}` +
+       `&per_page=50&order_by=observed_on&quality_grade=research`;
+     const res = await fetch(url);
+     const data = await res.json();
+     return data.results;
+   }
+   
+   // GBIF でレッドリスト・在来種情報を補完
+   async function fetchGBIFSpeciesInfo(speciesName) {
+     const searchUrl = `https://api.gbif.org/v1/species/search?q=${encodeURIComponent(speciesName)}&limit=1`;
+     const res = await fetch(searchUrl);
+     const data = await res.json();
+     return data.results[0];
+   }
+   
+   // Shannon多様性指数の計算
+   function shannonIndex(speciesCounts) {
+     const total = speciesCounts.reduce((a, b) => a + b, 0);
+     return -speciesCounts.reduce((H, n) => {
+       const p = n / total;
+       return H + (p > 0 ? p * Math.log(p) : 0);
+     }, 0);
+   }
+   
+   ===================================================== */
+</script>
+</body>
+</html>
