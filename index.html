@@ -267,112 +267,26 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
   </div>
 
   <div class="news-filters">
-    <button class="filter-btn active" onclick="filterNews('all',this)">すべて</button>
-    <button class="filter-btn" onclick="filterNews('tnfd',this)">TNFD</button>
-    <button class="filter-btn" onclick="filterNews('gbf',this)">GBF / CBD</button>
-    <button class="filter-btn" onclick="filterNews('domestic',this)">国内政策</button>
-    <button class="filter-btn" onclick="filterNews('science',this)">科学・研究</button>
-    <button class="filter-btn" onclick="filterNews('finance',this)">自然関連金融</button>
+    <button class="filter-btn active" data-cat="all"      onclick="filterNews('all',this)">すべて</button>
+    <button class="filter-btn"        data-cat="tnfd"     onclick="filterNews('tnfd',this)">TNFD</button>
+    <button class="filter-btn"        data-cat="gbf"      onclick="filterNews('gbf',this)">GBF / CBD</button>
+    <button class="filter-btn"        data-cat="domestic" onclick="filterNews('domestic',this)">国内政策</button>
+    <button class="filter-btn"        data-cat="science"  onclick="filterNews('science',this)">科学・研究</button>
+    <button class="filter-btn"        data-cat="finance"  onclick="filterNews('finance',this)">自然関連金融</button>
   </div>
 
   <div class="news-grid" style="margin-bottom:24px;">
-    <div class="news-featured">
-      <div class="news-featured-banner">
-        <span class="badge badge-teal">FEATURED</span>
-      </div>
-      <div class="news-featured-body">
-        <div class="news-featured-meta">2026-05-28 · TNFD</div>
-        <div class="news-featured-title">TNFD v1.1 追加ガイダンス公表：農業・食品セクター向け詳細指標を策定</div>
-        <div class="news-featured-excerpt">
-          自然関連財務情報開示タスクフォース（TNFD）は、農業・食品・飲料セクターを対象とした追加セクター別ガイダンスv1.1を公表した。LEAP（位置確認・評価・評価・準備）アプローチの詳細化に加え、水・土地・生物多様性の3軸にわたる新たなコア指標セットが追加された。日本の食品大手12社が早期採用を表明。
-        </div>
-        <div class="news-featured-tags">
-          <span class="badge badge-teal">TNFD</span>
-          <span class="badge badge-blue">開示</span>
-          <span class="badge badge-amber">農業・食品</span>
-        </div>
-      </div>
+    <div id="news-featured" class="news-featured">
+      <div style="padding:60px 20px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px;">読み込み中...</div>
     </div>
-    <div class="news-list">
-      <div class="news-item" data-cat="domestic">
-        <div class="news-item-title">環境省、NBSAP（昆明・モントリオール目標）国内実施計画を閣議決定</div>
-        <div class="news-item-meta"><span class="badge badge-teal">国内政策</span><span>2026-05-20</span></div>
-      </div>
-      <div class="news-item" data-cat="finance">
-        <div class="news-item-title">EU自然修復規則（NRL）: 2030年目標達成に向けた第一次進捗報告書公表</div>
-        <div class="news-item-meta"><span class="badge badge-purple">金融</span><span>2026-05-15</span></div>
-      </div>
-      <div class="news-item" data-cat="science">
-        <div class="news-item-title">IPBES: 侵略的外来種が生物多様性損失の第3位の直接要因と確認（改訂版）</div>
-        <div class="news-item-meta"><span class="badge badge-blue">科学</span><span>2026-05-10</span></div>
-      </div>
-      <div class="news-item" data-cat="gbf">
-        <div class="news-item-title">CBD COP16 後継議題：2026年10月 トルコ・コンヤ開催決定</div>
-        <div class="news-item-meta"><span class="badge badge-amber">GBF</span><span>2026-04-28</span></div>
-      </div>
-    </div>
+    <div id="news-side-list" class="news-list"></div>
   </div>
 
   <div class="label-row">
     <span style="font-size:13px; font-weight:500;">最近の記事一覧</span>
     <span class="more-link">すべて表示 →</span>
   </div>
-  <div class="news-full-list" id="news-table">
-    <div class="news-row" data-cat="tnfd">
-      <div class="news-row-date">2026-06-03</div>
-      <div class="news-row-title">TNFD採用企業が世界で500社超 — 日本は96社でアジア最多水準を維持</div>
-      <div class="news-row-src">TNFD公式</div>
-      <div class="news-row-tag"><span class="badge badge-teal">TNFD</span></div>
-    </div>
-    <div class="news-row" data-cat="domestic">
-      <div class="news-row-date">2026-05-30</div>
-      <div class="news-row-title">金融庁：TNFD提言に基づく自然関連リスク開示の検討会報告書（最終版）を公表</div>
-      <div class="news-row-src">金融庁</div>
-      <div class="news-row-tag"><span class="badge badge-blue">国内政策</span></div>
-    </div>
-    <div class="news-row" data-cat="science">
-      <div class="news-row-date">2026-05-22</div>
-      <div class="news-row-title">Nature誌：海洋酸性化が珊瑚礁生態系の炭素隔離機能に与える影響を定量化</div>
-      <div class="news-row-src">Nature</div>
-      <div class="news-row-tag"><span class="badge badge-purple">科学</span></div>
-    </div>
-    <div class="news-row" data-cat="finance">
-      <div class="news-row-date">2026-05-18</div>
-      <div class="news-row-title">TNFD採用FTSE100企業の自然関連リスク評価手法の比較分析 — MSCI報告書</div>
-      <div class="news-row-src">MSCI</div>
-      <div class="news-row-tag"><span class="badge badge-amber">金融</span></div>
-    </div>
-    <div class="news-row" data-cat="gbf">
-      <div class="news-row-date">2026-05-12</div>
-      <div class="news-row-title">30x30目標の進捗：陸域19.3%・海域8.6%が保護下に — WCMC中間報告</div>
-      <div class="news-row-src">UNEP-WCMC</div>
-      <div class="news-row-tag"><span class="badge badge-teal">GBF</span></div>
-    </div>
-    <div class="news-row" data-cat="domestic">
-      <div class="news-row-date">2026-05-07</div>
-      <div class="news-row-title">農林水産省：生態系サービス評価に関する手引き（第2版）を公表</div>
-      <div class="news-row-src">農水省</div>
-      <div class="news-row-tag"><span class="badge badge-blue">国内政策</span></div>
-    </div>
-    <div class="news-row" data-cat="science">
-      <div class="news-row-date">2026-04-25</div>
-      <div class="news-row-title">環境省RDB2026版公表：維管束植物の絶滅危惧種が前回比+186種に増加</div>
-      <div class="news-row-src">環境省</div>
-      <div class="news-row-tag"><span class="badge badge-red">科学</span></div>
-    </div>
-    <div class="news-row" data-cat="finance">
-      <div class="news-row-date">2026-04-18</div>
-      <div class="news-row-title">ISSB、TNFD連携：S2とのダブルマテリアリティ整合ガイダンス草案をコンサル開始</div>
-      <div class="news-row-src">ISSB/TNFD</div>
-      <div class="news-row-tag"><span class="badge badge-purple">金融</span></div>
-    </div>
-    <div class="news-row" data-cat="tnfd">
-      <div class="news-row-date">2026-04-10</div>
-      <div class="news-row-title">TNFD LEAP評価: 日本企業実施状況サーベイ2026 — 開示品質の地域差が顕在化</div>
-      <div class="news-row-src">PwC Japan</div>
-      <div class="news-row-tag"><span class="badge badge-teal">TNFD</span></div>
-    </div>
-  </div>
+  <div class="news-full-list" id="news-table"></div>
 </section>
 
 <!-- ═══ SECTION: DASHBOARD ═══ -->
@@ -857,20 +771,13 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
 </div>
 
 <script>
+// ── セクション・フレームワーク切替 ──────────────────────────
 function showSection(id, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   btn.classList.add('active');
   window.scrollTo(0, 0);
-}
-
-function filterNews(cat, btn) {
-  document.querySelectorAll('.news-filters .filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('#news-table .news-row').forEach(row => {
-    row.style.display = (cat === 'all' || row.dataset.cat === cat) ? '' : 'none';
-  });
 }
 
 function filterCases(cat, btn) {
@@ -888,6 +795,106 @@ function showFw(id, btn) {
   btn.classList.add('active');
   document.getElementById('fw-' + id).classList.add('active');
 }
+
+// ── ニュース動的ロード ────────────────────────────────────
+const CAT_LABEL = { tnfd:'TNFD', gbf:'GBF/CBD', domestic:'国内政策', science:'科学・研究', finance:'自然関連金融' };
+const CAT_BADGE = { tnfd:'badge-teal', gbf:'badge-amber', domestic:'badge-blue', science:'badge-purple', finance:'badge-purple' };
+
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function badge(cat) {
+  return `<span class="badge ${CAT_BADGE[cat]||'badge-teal'}">${CAT_LABEL[cat]||cat}</span>`;
+}
+
+function renderNews(data) {
+  const items = data.items || [];
+  if (!items.length) return;
+
+  // ナビの更新日を同期
+  if (data.updated) {
+    const nm = document.querySelector('.nav-meta');
+    if (nm) nm.textContent = `更新: ${data.updated}`;
+  }
+
+  // フィーチャー記事（最新1件）
+  const f = items[0];
+  const featured = document.getElementById('news-featured');
+  featured.dataset.url = f.url || '';
+  featured.style.cursor = f.url ? 'pointer' : '';
+  featured.innerHTML = `
+    <div class="news-featured-banner">
+      <span class="badge badge-teal">FEATURED</span>
+    </div>
+    <div class="news-featured-body">
+      <div class="news-featured-meta">${esc(f.date)} · ${CAT_LABEL[f.category]||f.category}</div>
+      <div class="news-featured-title">${esc(f.title)}</div>
+      ${f.excerpt ? `<div class="news-featured-excerpt">${esc(f.excerpt)}</div>` : ''}
+      <div class="news-featured-tags">${badge(f.category)}</div>
+    </div>`;
+
+  // サイドリスト（2〜5件目）
+  document.getElementById('news-side-list').innerHTML = items.slice(1, 5).map(it => `
+    <div class="news-item" data-cat="${it.category}" data-url="${esc(it.url||'')}">
+      <div class="news-item-title">${esc(it.title)}</div>
+      <div class="news-item-meta">${badge(it.category)}<span>${esc(it.date)}</span></div>
+    </div>`).join('');
+
+  // 一覧テーブル（6件目以降）
+  document.getElementById('news-table').innerHTML = items.slice(5).map(it => `
+    <div class="news-row" data-cat="${it.category}" data-url="${esc(it.url||'')}">
+      <div class="news-row-date">${esc(it.date)}</div>
+      <div class="news-row-title">${esc(it.title)}</div>
+      <div class="news-row-src">${esc(it.source||'')}</div>
+      <div class="news-row-tag">${badge(it.category)}</div>
+    </div>`).join('');
+
+  // 現在のフィルタを再適用
+  const activeBtn = document.querySelector('.news-filters .filter-btn.active');
+  if (activeBtn) applyFilter(activeBtn.dataset.cat || 'all');
+}
+
+function applyFilter(cat) {
+  ['#news-table .news-row', '#news-side-list .news-item'].forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.style.display = (cat === 'all' || el.dataset.cat === cat) ? '' : 'none';
+    });
+  });
+}
+
+function filterNews(cat, btn) {
+  document.querySelectorAll('.news-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter(cat);
+}
+
+// クリックでURLを開く（イベント委任）
+function initNewsClicks() {
+  ['news-featured', 'news-side-list', 'news-table'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', e => {
+      const el = e.target.closest('[data-url]');
+      if (el?.dataset.url) window.open(el.dataset.url, '_blank', 'noopener,noreferrer');
+    });
+  });
+}
+
+async function loadNews() {
+  try {
+    const res = await fetch('./news.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    renderNews(await res.json());
+  } catch (e) {
+    console.warn('news.json の読み込みに失敗:', e);
+    document.getElementById('news-featured').innerHTML =
+      '<div style="padding:40px;text-align:center;color:var(--text3);font-size:12px;">ニュースを読み込めませんでした</div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initNewsClicks();
+  loadNews();
+});
 </script>
 </body>
 </html>
