@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>神大留学リアル — 活動紹介</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  background: #D4CEBC;
+  padding: 40px 0;
+}
+
+/* ── A4 PAGE ── */
+.page {
+  width: 794px;
+  min-height: 1123px;
+  margin: 0 auto 48px;
+  position: relative;
+  overflow: hidden;
+  background-color: #F5EEE0;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 31px,
+      rgba(190, 165, 95, 0.13) 31px,
+      rgba(190, 165, 95, 0.13) 32px
+    );
+  box-shadow: 0 4px 32px rgba(0,0,0,0.22);
+}
+
+/* ── HEADER ── */
+.header {
+  background: linear-gradient(135deg, #1B2C4E 0%, #22345C 55%, #1A3560 100%);
+  padding: 34px 44px 38px;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 29px,
+      rgba(255,255,255,0.04) 29px,
+      rgba(255,255,255,0.04) 30px
+    );
+}
+
+.header-eyebrow {
+  font-size: 9.5px;
+  letter-spacing: 0.28em;
+  color: rgba(255,255,255,0.55);
+  font-weight: 400;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.header-title {
+  font-size: 62px;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1;
+  position: relative;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.header-title .accent {
+  color: #E8A820;
+}
+
+.header-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.68);
+  font-weight: 300;
+  margin-bottom: 20px;
+  position: relative;
+  letter-spacing: 0.04em;
+}
+
+.header-subtitle-divider {
+  width: 40px;
+  height: 2px;
+  background: #E8A820;
+  margin: 14px 0;
+  position: relative;
+}
+
+.header-badge {
+  display: inline-block;
+  background: #E8A820;
+  color: #1B2C4E;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 18px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+  position: relative;
+}
+
+/* compact header for page 2 */
+.header-compact {
+  padding: 22px 44px 26px;
+}
+
+.header-compact .header-title {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+/* ── BODY ── */
+.body {
+  padding: 26px 36px 32px;
+}
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 24px;
+}
+
+.section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.section-eyebrow-line {
+  width: 22px;
+  height: 2px;
+  background: #E8A820;
+  flex-shrink: 0;
+}
+
+.section-eyebrow-num {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #E8A820;
+}
+
+.section-title {
+  font-size: 21px;
+  font-weight: 700;
+  color: #1B2C4E;
+  margin-bottom: 14px;
+  letter-spacing: 0.01em;
+}
+
+/* ── BASIC INFO GRID ── */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.info-card {
+  background: #FFFFFF;
+  border: 1px solid #DDD5C0;
+  border-radius: 8px;
+  padding: 13px 14px;
+}
+
+.info-card-label {
+  font-size: 8.5px;
+  color: #E8A820;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 7px;
+}
+
+.info-card-value {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1B2C4E;
+  line-height: 1.35;
+}
+
+.info-card-sub {
+  font-size: 9.5px;
+  color: #888;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+/* ── MEDIA LIST ── */
+.media-box {
+  background: #FFFFFF;
+  border: 1px solid #DDD5C0;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.media-box-label {
+  font-size: 8.5px;
+  color: #E8A820;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+.media-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid #EDE7D8;
+}
+
+.media-row:last-child { border-bottom: none; }
+
+.media-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1B2C4E;
+  margin-bottom: 2px;
+}
+
+.media-url {
+  font-size: 10px;
+  color: #2D9CB4;
+}
+
+.media-date {
+  font-size: 9.5px;
+  color: #AAA;
+  flex-shrink: 0;
+}
+
+/* ── PROBLEM CARDS ── */
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 11px;
+}
+
+.problem-card {
+  background: #FFFFFF;
+  border: 1px solid #DDD5C0;
+  border-radius: 8px;
+  padding: 15px 14px;
+  border-top: 3px solid;
+}
+
+.problem-card.c1 { border-top-color: #E8750A; }
+.problem-card.c2 { border-top-color: #2D9CB4; }
+.problem-card.c3 { border-top-color: #6B5EA8; }
+
+.problem-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 7px;
+  line-height: 1.4;
+}
+
+.problem-card.c1 .problem-title { color: #E8750A; }
+.problem-card.c2 .problem-title { color: #2D9CB4; }
+.problem-card.c3 .problem-title { color: #6B5EA8; }
+
+.problem-body {
+  font-size: 10.5px;
+  color: #555;
+  line-height: 1.72;
+  margin-bottom: 10px;
+}
+
+.solution-tag {
+  display: inline-block;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #E8A820;
+  border: 1px solid #E8A820;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+
+.solution-body {
+  font-size: 10.5px;
+  color: #333;
+  line-height: 1.72;
+}
+
+/* ── MISSION LIST ── */
+.mission-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.mission-item {
+  background: #FFFFFF;
+  border: 1px solid #DDD5C0;
+  border-radius: 8px;
+  padding: 13px 15px;
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  border-left: 4px solid #1B2C4E;
+}
+
+.mission-icon {
+  font-size: 19px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.mission-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1B2C4E;
+  margin-bottom: 4px;
+}
+
+.mission-body {
+  font-size: 10.5px;
+  color: #555;
+  line-height: 1.72;
+}
+
+/* ── ACTIVITY CARDS ── */
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 11px;
+}
+
+.activity-card {
+  background: #FFFFFF;
+  border: 1px solid #DDD5C0;
+  border-radius: 8px;
+  padding: 16px 14px;
+  text-align: center;
+}
+
+.activity-icon {
+  font-size: 26px;
+  margin-bottom: 7px;
+}
+
+.activity-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1B2C4E;
+  margin-bottom: 10px;
+}
+
+.activity-items {
+  list-style: none;
+  text-align: left;
+}
+
+.activity-items li {
+  font-size: 10.5px;
+  color: #555;
+  padding: 2.5px 0 2.5px 13px;
+  position: relative;
+  line-height: 1.55;
+}
+
+.activity-items li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: #E8A820;
+  font-size: 9px;
+  top: 3px;
+}
+
+/* ── ORG CHART ── */
+.org-root-wrap {
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.org-root-box {
+  display: inline-block;
+  background: #1B2C4E;
+  color: white;
+  padding: 9px 24px 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.org-root-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.org-root-sub {
+  font-size: 9px;
+  opacity: 0.65;
+  margin-top: 2px;
+}
+
+.org-stem {
+  width: 2px;
+  height: 14px;
+  background: #1B2C4E;
+  margin: 0 auto;
+}
+
+.org-crossbar-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 80px;
+  margin-bottom: 0;
+}
+
+.org-crossbar {
+  flex: 1;
+  height: 2px;
+  background: #1B2C4E;
+}
+
+.org-crossbar-center {
+  width: 2px;
+  height: 14px;
+  background: #1B2C4E;
+}
+
+.org-branch-connectors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 0 80px;
+  margin-bottom: 0;
+}
+
+.org-branch-stem {
+  width: 2px;
+  height: 12px;
+  background: #1B2C4E;
+  margin: 0 auto;
+}
+
+.org-depts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-bottom: 11px;
+}
+
+.org-dept {
+  border-radius: 8px;
+  padding: 13px 13px;
+  color: white;
+}
+
+.org-dept.da { background: #243760; }
+.org-dept.db { background: #1A7040; }
+.org-dept.dc { background: #5B3D9A; }
+
+.org-dept-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.org-dept-role {
+  font-size: 8.5px;
+  opacity: 0.65;
+  margin-bottom: 8px;
+}
+
+.org-dept-items {
+  list-style: none;
+}
+
+.org-dept-items li {
+  font-size: 10px;
+  padding: 2px 0 2px 11px;
+  position: relative;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.org-dept-items li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  font-size: 8px;
+  top: 3px;
+}
+
+/* ── TOOLS & MEETING ── */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 9px;
+}
+
+.tool-card {
+  background: #FFFFFF;
+  border: 1px solid #DDD5C0;
+  border-radius: 8px;
+  padding: 11px 13px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.tool-icon { font-size: 18px; flex-shrink: 0; }
+
+.tool-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #1B2C4E;
+}
+
+.tool-desc {
+  font-size: 9.5px;
+  color: #777;
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+.meeting-card {
+  background: #FFFFFF;
+  border: 1px solid #DDD5C0;
+  border-radius: 8px;
+  padding: 11px 13px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.meeting-block { text-align: center; }
+
+.meeting-label {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #AAA;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+}
+
+.meeting-val {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1B2C4E;
+  line-height: 1;
+}
+
+.meeting-note {
+  font-size: 8.5px;
+  color: #888;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.sep {
+  width: 1px;
+  height: 32px;
+  background: #E0D8C5;
+  flex-shrink: 0;
+}
+
+/* ── PRINT ── */
+@media print {
+  body { background: none; padding: 0; }
+  .page { margin: 0; box-shadow: none; page-break-after: always; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 1: 団体基本情報 ＋ 設立背景・問題意識
+     ═══════════════════════════════════════════════ -->
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-eyebrow">STUDENT ORGANIZATION · KOBE UNIVERSITY</div>
+    <div class="header-title">神大留学<span class="accent">リアル</span></div>
+    <div class="header-subtitle">〜神大生の留学をもっと身近に〜</div>
+    <div class="header-subtitle-divider"></div>
+    <div class="header-badge">活動紹介（2025年度）</div>
+  </div>
+
+  <div class="body">
+
+    <!-- SECTION 01: 団体基本情報 -->
+    <div class="section">
+      <div class="section-eyebrow">
+        <div class="section-eyebrow-line"></div>
+        <div class="section-eyebrow-num">01</div>
+      </div>
+      <div class="section-title">団体基本情報</div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-label">団 体 名</div>
+          <div class="info-card-value">神大留学リアル</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">設 立 年 月</div>
+          <div class="info-card-value">2025年</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">代 表 者</div>
+          <div class="info-card-value">宇都健太</div>
+          <div class="info-card-sub">経営学部 4回生</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">幹事人数 / 活動対象</div>
+          <div class="info-card-value">16名</div>
+          <div class="info-card-sub">神戸大学在学生・卒業生<br>留学検討中の全大学生・高校生</div>
+        </div>
+      </div>
+
+      <div class="media-box">
+        <div class="media-box-label">活 動 媒 体</div>
+        <div class="media-row">
+          <div>
+            <div class="media-name">📸&nbsp; Instagram</div>
+            <div class="media-url">@kobeu_studyabroad</div>
+          </div>
+          <div class="media-date">2025年9月〜</div>
+        </div>
+        <div class="media-row">
+          <div>
+            <div class="media-name">✍️&nbsp; Note</div>
+            <div class="media-url">note.com/kobeu_abroad</div>
+          </div>
+          <div class="media-date">2026年3月〜</div>
+        </div>
+        <div class="media-row">
+          <div>
+            <div class="media-name">📌&nbsp; Padlet</div>
+            <div class="media-url">padlet.com/kobeustudyabroad2025/padlet-ktoczxwypj225o11</div>
+          </div>
+          <div class="media-date">2026年4月〜</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 02: 設立背景・問題意識 -->
+    <div class="section">
+      <div class="section-eyebrow">
+        <div class="section-eyebrow-line"></div>
+        <div class="section-eyebrow-num">02</div>
+      </div>
+      <div class="section-title">設立背景・問題意識</div>
+
+      <div class="problem-grid">
+        <div class="problem-card c1">
+          <div class="problem-title">留学者数の減少</div>
+          <div class="problem-body">神戸大学における海外留学生の減少傾向が続いている。</div>
+          <div class="solution-tag">→ 解決策</div>
+          <div class="solution-body">「神大生の留学をもっと身近に」するための情報発信。学外の学生にも有益な情報を提供する。</div>
+        </div>
+        <div class="problem-card c2">
+          <div class="problem-title">具体的情報の不足</div>
+          <div class="problem-body">事前準備・現地生活・奨学金対策など、大学側の発信では具体性が不足している。</div>
+          <div class="solution-tag">→ 解決策</div>
+          <div class="solution-body">SNSを活用し具体的情報へのアクセス性を高め、情報格差を是正する。</div>
+        </div>
+        <div class="problem-card c3">
+          <div class="problem-title">コミュニティの欠如</div>
+          <div class="problem-body">留学する人はまだ少数派で、タテ・ヨコのつながりが不足している。</div>
+          <div class="solution-tag">→ 解決策</div>
+          <div class="solution-body">志望大学の先輩（タテ）と一緒に応募する同期（ヨコ）の繋がりを提供するコミュニティを運営する。</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /body -->
+</div><!-- /page 1 -->
+
+
+<!-- ═══════════════════════════════════════════════
+     PAGE 2: 活動理念 ＋ 活動内容 ＋ 運営組織
+     ═══════════════════════════════════════════════ -->
+<div class="page">
+
+  <!-- COMPACT HEADER -->
+  <div class="header header-compact">
+    <div class="header-eyebrow">STUDENT ORGANIZATION · KOBE UNIVERSITY</div>
+    <div class="header-title">神大留学<span class="accent">リアル</span></div>
+    <div class="header-badge">活動紹介（2025年度）</div>
+  </div>
+
+  <div class="body">
+
+    <!-- SECTION 03: 活動理念・ミッション -->
+    <div class="section">
+      <div class="section-eyebrow">
+        <div class="section-eyebrow-line"></div>
+        <div class="section-eyebrow-num">03</div>
+      </div>
+      <div class="section-title">活動理念・ミッション</div>
+
+      <div class="mission-list">
+        <div class="mission-item">
+          <div class="mission-icon">🌍</div>
+          <div>
+            <div class="mission-title">留学への挑戦を促進する</div>
+            <div class="mission-body">神戸大学から海外へ留学する学生を増やすことを第一の目標とする。どんな出自を持つ人であれ、交換留学の機会は公平にあるべきという信念のもと活動する。</div>
+          </div>
+        </div>
+        <div class="mission-item">
+          <div class="mission-icon">🔗</div>
+          <div>
+            <div class="mission-title">双方向コミュニティを形成する</div>
+            <div class="mission-body">留学を「検討している人」が、「留学中の人」「留学経験者」と直接繋がれるコミュニティを形成・運営する。</div>
+          </div>
+        </div>
+        <div class="mission-item">
+          <div class="mission-icon">⚖️</div>
+          <div>
+            <div class="mission-title">あらゆる情報格差をなくす</div>
+            <div class="mission-body">現役留学生が自身の活動・学び・現地の様子を発信するプラットフォームとして機能し、情報の非対称性を解消する。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 04: 活動内容（コンテンツ） -->
+    <div class="section">
+      <div class="section-eyebrow">
+        <div class="section-eyebrow-line"></div>
+        <div class="section-eyebrow-num">04</div>
+      </div>
+      <div class="section-title">活動内容（コンテンツ）</div>
+
+      <div class="activity-grid">
+        <div class="activity-card">
+          <div class="activity-icon">📸</div>
+          <div class="activity-name">Instagram</div>
+          <ul class="activity-items">
+            <li>留学アンバサダー制度</li>
+            <li>対面・オンラインイベント告知</li>
+            <li>リール作成・発信</li>
+          </ul>
+        </div>
+        <div class="activity-card">
+          <div class="activity-icon">✍️</div>
+          <div class="activity-name">note</div>
+          <ul class="activity-items">
+            <li>留学体験談の記事作成</li>
+            <li>情報量の多い詳細発信</li>
+          </ul>
+        </div>
+        <div class="activity-card">
+          <div class="activity-icon">📌</div>
+          <div class="activity-name">Padlet</div>
+          <ul class="activity-items">
+            <li>各コンテンツの統合</li>
+            <li>情報ポータル機能</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 05: 運営システム・組織図 -->
+    <div class="section">
+      <div class="section-eyebrow">
+        <div class="section-eyebrow-line"></div>
+        <div class="section-eyebrow-num">05</div>
+      </div>
+      <div class="section-title">運営システム・組織図</div>
+
+      <!-- Org Chart -->
+      <div class="org-root-wrap">
+        <div class="org-root-box">
+          <div class="org-root-name">🏛&nbsp; 神大留学リアル</div>
+          <div class="org-root-sub">学生団体 全体統括</div>
+        </div>
+      </div>
+      <div class="org-stem"></div>
+      <!-- Crossbar -->
+      <div style="display:flex; align-items:flex-start; padding:0 132px; margin-bottom:0;">
+        <div style="flex:1; height:2px; background:#1B2C4E; margin-top:12px;"></div>
+        <div style="width:2px; height:14px; background:#1B2C4E; flex-shrink:0;"></div>
+        <div style="flex:1; height:2px; background:#1B2C4E; margin-top:12px;"></div>
+      </div>
+      <!-- Branch stems -->
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); padding:0 132px; margin-bottom:3px;">
+        <div style="width:2px; height:10px; background:#1B2C4E; margin:0 auto;"></div>
+        <div style="width:2px; height:10px; background:#1B2C4E; margin:0 auto;"></div>
+        <div style="width:2px; height:10px; background:#1B2C4E; margin:0 auto;"></div>
+      </div>
+
+      <div class="org-depts">
+        <div class="org-dept da">
+          <div class="org-dept-title">A. 運営管理部</div>
+          <div class="org-dept-role">B・C部門の全体管理</div>
+          <ul class="org-dept-items">
+            <li>会議調整・議事進行</li>
+            <li>渉外・対外折衝</li>
+            <li>団体設立関連手続き</li>
+          </ul>
+        </div>
+        <div class="org-dept db">
+          <div class="org-dept-title">B. 広報部</div>
+          <div class="org-dept-role">情報発信・コンテンツ管理</div>
+          <ul class="org-dept-items">
+            <li>Instagram（ストーリー・固定投稿）</li>
+            <li>Canvaコンテンツ作成</li>
+            <li>note・website管理</li>
+          </ul>
+        </div>
+        <div class="org-dept dc">
+          <div class="org-dept-title">C. 留学支援部</div>
+          <div class="org-dept-role">コミュニティ・イベント管理</div>
+          <ul class="org-dept-items">
+            <li>支援LINEグループ運営</li>
+            <li>オープンチャット管理</li>
+            <li>対面・オンラインイベント企画・実行</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tools & Meeting -->
+      <div class="bottom-grid">
+        <div class="tool-card">
+          <div class="tool-icon">🗂</div>
+          <div>
+            <div class="tool-name">Notion（全員）</div>
+            <div class="tool-desc">議事録・タスク管理の拠点</div>
+          </div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-icon">💬</div>
+          <div>
+            <div class="tool-name">Discord（全員）</div>
+            <div class="tool-desc">進捗・相談などコミュニケーションの場。各班ごとにチャンネルが分岐。</div>
+          </div>
+        </div>
+        <div class="meeting-card">
+          <div>📅</div>
+          <div class="meeting-block">
+            <div class="meeting-label">会議頻度</div>
+            <div class="meeting-val">月2回</div>
+          </div>
+          <div class="sep"></div>
+          <div class="meeting-block">
+            <div class="meeting-label">開始時刻</div>
+            <div class="meeting-val">21:00〜</div>
+            <div class="meeting-note">留学メンバーと<br>時差を合わせるため</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /section 05 -->
+
+  </div><!-- /body -->
+</div><!-- /page 2 -->
+
+</body>
+</html>
