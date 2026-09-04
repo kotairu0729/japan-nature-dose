@@ -40,7 +40,7 @@ export interface RecordsState {
 type Action =
   | { type: 'hydrate'; entries: PeiEntry[]; notice: string | null }
   | { type: 'add'; entry: PeiEntry }
-  | { type: 'update'; entry: PeiEntry }
+  | { type: 'update'; id: string; input: PeiEntryInput; updatedAt: string }
   | { type: 'remove'; id: string }
   | { type: 'replaceAll'; entries: PeiEntry[]; notice: string | null }
   | { type: 'notice'; notice: string | null };
@@ -54,10 +54,15 @@ export function recordsReducer(state: RecordsState, action: Action): RecordsStat
     case 'add':
       return { ...state, entries: sortByDateDesc([...state.entries, action.entry]) };
     case 'update':
+      // createdAt は最初に記録した時刻なので、更新では引き継ぐ
       return {
         ...state,
         entries: sortByDateDesc(
-          state.entries.map((e) => (e.id === action.entry.id ? action.entry : e)),
+          state.entries.map((e) =>
+            e.id === action.id
+              ? { ...action.input, id: e.id, createdAt: e.createdAt, updatedAt: action.updatedAt }
+              : e,
+          ),
         ),
       };
     case 'remove':
@@ -89,6 +94,8 @@ export function RecordsProvider({ children }: { children: ReactNode }): ReactNod
   const [state, dispatch] = useReducer(recordsReducer, initialState);
   // StrictMode の二重実行でも初回読み込みが二度走らないようにする
   const hydratedOnce = useRef(false);
+  // 読み込み直後の配列。これと同一のうちは保存し直す必要がない
+  const hydratedEntries = useRef<PeiEntry[] | null>(null);
 
   useEffect(() => {
     if (hydratedOnce.current) return;
@@ -99,6 +106,7 @@ export function RecordsProvider({ children }: { children: ReactNode }): ReactNod
     if (result.skipped > 0) {
       messages.push(`形式が正しくない記録を ${result.skipped} 件読み飛ばしました。`);
     }
+    hydratedEntries.current = result.entries;
     dispatch({
       type: 'hydrate',
       entries: result.entries,
@@ -108,6 +116,10 @@ export function RecordsProvider({ children }: { children: ReactNode }): ReactNod
 
   useEffect(() => {
     if (!state.hydrated) return;
+    // 読み込んだ内容をそのまま書き戻さない。無意味な書き込みを避けるだけでなく、
+    // 読み込みに失敗した直後に空の配列で既存データを上書きするのを防ぐ。
+    // reducer は変更のたびに新しい配列を作るため、参照の同一性で判定できる。
+    if (state.entries === hydratedEntries.current) return;
     const error = saveEntries(state.entries);
     if (error) dispatch({ type: 'notice', notice: error });
   }, [state.entries, state.hydrated]);
@@ -121,10 +133,7 @@ export function RecordsProvider({ children }: { children: ReactNode }): ReactNod
         return entry;
       },
       updateEntry: (id, input) => {
-        dispatch({
-          type: 'update',
-          entry: { ...input, id, createdAt: input.date, updatedAt: new Date().toISOString() },
-        });
+        dispatch({ type: 'update', id, input, updatedAt: new Date().toISOString() });
       },
       removeEntry: (id) => dispatch({ type: 'remove', id }),
       clearAll: () => dispatch({ type: 'replaceAll', entries: [], notice: 'すべての記録を削除しました。' }),

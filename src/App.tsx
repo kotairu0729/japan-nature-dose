@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import HomePage from './pages/HomePage';
 import RecordPage from './pages/RecordPage';
 import TrendsPage from './pages/TrendsPage';
 import EvidencePage from './pages/EvidencePage';
+import SettingsPage from './pages/SettingsPage';
 import { useRecords, useRecordsActions } from './state/RecordsContext';
 
 const TABS = [
@@ -27,8 +29,15 @@ export default function App() {
         return <TrendsPage onGoToRecord={() => setTab('record')} />;
       case 'evidence':
         return <EvidencePage />;
+      case 'settings':
+        return <SettingsPage />;
       default:
-        return <p className="small muted">準備中</p>;
+        return (
+          <HomePage
+            onGoToRecord={() => setTab('record')}
+            onGoToEvidence={() => setTab('evidence')}
+          />
+        );
     }
   }, [tab]);
 
