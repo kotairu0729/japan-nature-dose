@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import RecordPage from './pages/RecordPage';
 import TrendsPage from './pages/TrendsPage';
+import EvidencePage from './pages/EvidencePage';
 import { useRecords, useRecordsActions } from './state/RecordsContext';
 
 const TABS = [
@@ -24,6 +25,8 @@ export default function App() {
         return <RecordPage />;
       case 'trends':
         return <TrendsPage onGoToRecord={() => setTab('record')} />;
+      case 'evidence':
+        return <EvidencePage />;
       default:
         return <p className="small muted">準備中</p>;
     }
