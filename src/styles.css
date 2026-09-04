@@ -15,10 +15,17 @@
   --accent: #4f7a4a;
   --accent-soft: #e6eee2;
   --accent-strong: #3a5c36;
-  --axis-frequency: #4f7a4a;
-  --axis-duration: #7a7f4a;
-  --axis-diversity: #4a6f7a;
-  --axis-intensity: #7a5a4a;
+  /* 4軸の色。dataviz の検証済みカテゴリカル配色スロット1〜4。
+     隣接ペアで CVD ΔE 9.1 / 通常視 22.9 を確保している。
+     明色面では diversity と intensity のコントラストが 3:1 未満のため、
+     値を必ず数字でも併記する（relief rule）。 */
+  --axis-frequency: #2a78d6;
+  --axis-duration: #eb6834;
+  --axis-diversity: #1baf7a;
+  --axis-intensity: #eda100;
+  --series-pei: #3a5c36;
+  --series-compare: #eb6834;
+  --grid: #e7e9e0;
   --warn-bg: #fbf3e2;
   --warn-border: #e3d3a8;
   --radius: 12px;
@@ -41,10 +48,14 @@
     --accent: #8fb787;
     --accent-soft: #2a3326;
     --accent-strong: #a9cba0;
-    --axis-frequency: #8fb787;
-    --axis-duration: #b6b982;
-    --axis-diversity: #86adb8;
-    --axis-intensity: #bc9481;
+    /* 暗色面用に取り直した同じ4色（隣接 CVD ΔE 8.4 / 通常視 19.8、全色 3:1 以上）。 */
+    --axis-frequency: #3987e5;
+    --axis-duration: #d95926;
+    --axis-diversity: #199e70;
+    --axis-intensity: #c98500;
+    --series-pei: #8fb787;
+    --series-compare: #d95926;
+    --grid: #2f3529;
     --warn-bg: #322c1e;
     --warn-border: #4d442c;
     --shadow: none;
@@ -837,4 +848,68 @@ button {
     align-items: center;
     gap: 12px;
   }
+}
+
+/* ── スモールマルチプル（軸別の推移） ── */
+
+.axis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.axis-grid__cell {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 6px 6px 4px;
+  min-width: 0;
+}
+
+.axis-grid__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 6px;
+}
+
+.axis-grid__title {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.axis-grid__chart {
+  height: 108px;
+}
+
+/* ── 表形式の表示（色に頼らずに読むための代替） ── */
+
+.data-table-wrap {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+.data-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 7px 8px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.data-table th:first-child,
+.data-table td:first-child {
+  text-align: left;
+}
+
+.data-table thead th {
+  color: var(--text-faint);
+  font-weight: 600;
+  font-size: 11.5px;
 }
