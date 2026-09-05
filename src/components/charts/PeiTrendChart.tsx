@@ -32,7 +32,7 @@ export default function PeiTrendChart({ data, average }: Props) {
   return (
     <div className="chart-wrap">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 8, right: 12, bottom: 4, left: -18 }}>
+        <LineChart data={data} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
           <CartesianGrid {...gridProps} />
           <XAxis
             dataKey="label"

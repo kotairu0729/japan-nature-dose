@@ -36,7 +36,7 @@ export default function MonthlyOverview({ data }: Props) {
     <>
       <div className="chart-wrap">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 8, right: 8, bottom: 4, left: -18 }} barCategoryGap="18%">
+          <BarChart data={data} margin={{ top: 8, right: 8, bottom: 4, left: 0 }} barCategoryGap="18%">
             <CartesianGrid {...gridProps} />
             <XAxis
               dataKey="label"
