@@ -139,7 +139,29 @@ src/
 明色面でコントラストが 3:1 未満になる 2 色があるため、値は必ず数字でも併記し、
 表形式の代替表示も用意している。
 
-## その他
+## 公開（GitHub Pages）
 
-以前このリポジトリの `index.html` にあった「生物多様性・自然資本 情報ハブ」は
-`public/hub/index.html` に退避しており、ビルド後は `/hub/` で参照できる。
+`main` に push されるたびに `.github/workflows/deploy.yml` がテスト・型チェック・
+ビルドを実行し、GitHub Pages に公開する。
+
+初回のみ、リポジトリの **Settings > Pages > Source** を **「GitHub Actions」** に
+切り替える必要がある（「Deploy from a branch」のままだとビルド前のソースが
+配信され、正しく表示されない）。
+
+公開後の URL：
+
+| パス | 内容 |
+|---|---|
+| `/japan-nature-dose/` | このアプリ |
+| `/japan-nature-dose/hub/` | 以前 `index.html` にあった「生物多様性・自然資本 情報ハブ」 |
+
+## ホーム画面への追加（iOS / Android）
+
+`manifest.webmanifest` と `apple-touch-icon.png`（180×180）を用意しており、
+ホーム画面に追加するとアドレスバーなしの全画面で起動する（`display: standalone`）。
+
+iOS ではホーム画面から起動したアプリと Safari のタブとで保存領域が分かれることが
+あるため、両方で記録すると内容が一致しないことがある。ホーム画面のアイコンから
+使うことを基本とし、移行が必要なときは設定画面の JSON 書き出し／取り込みを使う。
+
+なお Service Worker は入れていないため、初回表示にはネットワーク接続が必要。

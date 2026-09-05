@@ -3,7 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f6f7f3" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f7f3" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#171a15" />
+
+    <!-- ホーム画面に追加したときの挙動。Safari のアドレスバーを出さずに起動する -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="自然体験" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <!-- iOS はホーム画面のアイコンに SVG を使わないため PNG を指定する -->
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <meta
       name="description"
       content="日常的な自然体験を PEI（Personalised Ecology Index）で記録・可視化し、関連する研究知見とあわせて振り返るためのアプリ。"

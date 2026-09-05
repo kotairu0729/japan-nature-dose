@@ -263,27 +263,40 @@ export default function RecordForm({
         />
       </div>
 
-      <div className="form-footer">
+      {/* 内訳は通常のカードとして流す。画面に貼り付けると設問を覆ってしまうため */}
+      <div className="card">
+        <h2 className="card__title">入力中の内容</h2>
         <div className="score-hero">
           <span className="score-hero__value">{formatScore(preview.pei)}</span>
           <span className="score-hero__unit">
             {missing.length > 0 ? '入力中の暫定値（0〜1）' : 'この記録の PEI（0〜1）'}
           </span>
         </div>
-        <AxisBars axes={preview} compact />
-        {missing.length > 0 && (
-          <p className="small muted">未入力：{missing.join('、')}</p>
-        )}
-        <div className="button-row">
-          <button className="button button--primary" type="submit" disabled={missing.length > 0}>
-            {initial ? 'この記録を更新' : '記録を保存'}
-          </button>
+        <div style={{ marginTop: 12 }}>
+          <AxisBars axes={preview} compact />
+        </div>
+      </div>
+
+      {/* 画面下に貼り付けるのは、スコアと保存ボタンだけに絞る。
+          小さい画面で設問が隠れないよう、高さを最小限にしている */}
+      <div className="form-footer">
+        <div className="form-footer__row">
+          <span className="form-footer__score">
+            <span className="form-footer__score-value">{formatScore(preview.pei)}</span>
+            <span className="form-footer__score-unit">{missing.length > 0 ? '暫定' : 'PEI'}</span>
+          </span>
           {onCancel && (
             <button className="button button--quiet" type="button" onClick={onCancel}>
               キャンセル
             </button>
           )}
+          <button className="button button--primary" type="submit" disabled={missing.length > 0}>
+            {initial ? '更新' : '保存'}
+          </button>
         </div>
+        {missing.length > 0 && (
+          <p className="small muted">未入力：{missing.join('、')}</p>
+        )}
       </div>
     </form>
   );

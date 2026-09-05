@@ -68,6 +68,10 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* 要素までスクロールしたとき、下に貼り付いた保存バーとタブバーに
+     隠れないようにする */
+  scroll-padding-bottom: 180px;
+  scroll-padding-top: 72px;
 }
 
 body {
@@ -109,7 +113,9 @@ button {
 }
 
 .app__header {
-  padding: 14px 16px 10px;
+  /* ホーム画面から全画面で起動したとき、ステータスバーに重ならないようにする。
+     Safari のタブ内では env() が 0 になるため見た目は変わらない。 */
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 10px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   position: sticky;
@@ -450,17 +456,43 @@ button {
   line-height: 1.6;
 }
 
+/* 入力中も常に見える保存バー。設問を覆わないよう高さを抑えている */
 .form-footer {
   position: sticky;
   bottom: calc(var(--tabbar-height) + 8px);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   box-shadow: 0 -1px 8px rgba(35, 40, 31, 0.07);
+}
+
+.form-footer__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-footer__score {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-right: auto;
+}
+
+.form-footer__score-value {
+  font-size: 24px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.form-footer__score-unit {
+  font-size: 11px;
+  color: var(--text-faint);
 }
 
 /* ── スコア表示 ── */
